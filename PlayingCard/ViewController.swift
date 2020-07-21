@@ -21,9 +21,9 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         var cards = [PlayingCard]()
-        for _ in 1...((cardViews.count+1)/2) {
+        for _ in 1...((cardViews.count+1)/2) { //bc they're pairs
             let card = deck.draw()!
-            cards += [card, card]
+            cards += [card, card] //adds a pair
         }
         for cardView in cardViews {
             cardView.isFaceUp = false
@@ -51,10 +51,10 @@ class ViewController: UIViewController {
     @objc func flipCard(_ recognizer: UITapGestureRecognizer) {
         switch recognizer.state {
         case .ended:
-            // transform cards to be bigger and then lower and hidden
             if let chosenCardView = recognizer.view as? PlayingCardView, faceUpCardViews.count < 2 {
                 lastChosenCardView = chosenCardView
                 cardBehavior.removeItem(chosenCardView)
+                // animation to flip the cards
                 UIView.transition(
                     with: chosenCardView,
                     duration: 0.5,
@@ -62,6 +62,7 @@ class ViewController: UIViewController {
                     animations: {
                         chosenCardView.isFaceUp = !chosenCardView.isFaceUp
                     },
+                    // transform cards to be bigger and then lower and hidden if they're the same
                     completion: { finished in
                         let cardsToAnimate = self.faceUpCardViews
                         if self.faceUpCardViewsMatch {
@@ -95,7 +96,9 @@ class ViewController: UIViewController {
                                     )
                                 }
                             )
-                        }  else if cardsToAnimate.count == 2 {
+                        }
+                        // flip the cards back if they arent the same
+                        else if cardsToAnimate.count == 2 {
                             if chosenCardView == self.lastChosenCardView {
                                 cardsToAnimate.forEach { cardView in
                                     UIView.transition(

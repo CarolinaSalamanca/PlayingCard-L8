@@ -8,35 +8,32 @@
 
 import UIKit
 
-@IBDesignable
+@IBDesignable // TO compile interface and show it in interface builder
 class PlayingCardView: UIView
 {
-    @IBInspectable
+    @IBInspectable // this attribute means we can modify this attribute in the interface builder attributes tab
+
     var rank: Int = 12 { didSet { setNeedsDisplay(); setNeedsLayout() } }
+    
     @IBInspectable
     var suit: String = "❤️" { didSet { setNeedsDisplay(); setNeedsLayout() } }
+   
     @IBInspectable
     var isFaceUp: Bool = true { didSet { setNeedsDisplay(); setNeedsLayout() } }
 
     @IBInspectable
     var faceCardScale: CGFloat = SizeRatio.faceCardImageSizeToBoundsSize { didSet { setNeedsDisplay() } }
     
-    @objc func adjustFaceCardScale(byHandlingGestureRecognizedBy recognizer: UIPinchGestureRecognizer) {
-        switch recognizer.state {
-        case .changed,.ended:
-            faceCardScale *= recognizer.scale
-            recognizer.scale = 1.0
-        default: break
-        }
-    }
-    
     override var collisionBoundsType: UIDynamicItemCollisionBoundsType {
         return .ellipse
     }
     
     private func centeredAttributedString(_ string: String, fontSize: CGFloat) -> NSAttributedString {
+        // scale font according to phone settings
         var font = UIFont.preferredFont(forTextStyle: .body).withSize(fontSize)
         font = UIFontMetrics(forTextStyle: .body).scaledFont(for: font)
+        
+        // center label text
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
         return NSAttributedString(string: string, attributes: [.paragraphStyle:paragraphStyle,.font:font])
@@ -63,11 +60,13 @@ class PlayingCardView: UIView
         label.isHidden = !isFaceUp
     }
     
+    // this is to redraw immediatly when the fonts size change
     override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
-        setNeedsDisplay()
-        setNeedsLayout()
+        setNeedsDisplay() // to notify the system that your view’s contents need to be redrawn.
+        setNeedsLayout()// to adjust the layout of a view’s subviews.
     }
     
+    // override, if the autoresizing and constraint-based behaviors of the subviews dont offer the behavior you want
     override func layoutSubviews() {
         super.layoutSubviews()
         
@@ -81,6 +80,27 @@ class PlayingCardView: UIView
         lowerRightCornerLabel.frame.origin = CGPoint(x: bounds.maxX, y: bounds.maxY)
             .offsetBy(dx: -cornerOffset, dy: -cornerOffset)
             .offsetBy(dx: -lowerRightCornerLabel.frame.size.width, dy: -lowerRightCornerLabel.frame.size.height)
+    }
+    
+//    Draws the receiver’s image within the passed-in rectangle.
+    override func draw(_ rect: CGRect) {
+        let roundedRect = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius) // drawing shapes
+        roundedRect.addClip()
+        UIColor.white.setFill() // the bg of the card
+        roundedRect.fill()  // to fill the cg of the card (if ommited its transparent)
+        
+        if isFaceUp {
+            if let faceCardImage = UIImage(named: rankString+suit, in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
+                faceCardImage.draw(in: bounds.zoom(by: faceCardScale)) // if card has image (e.g king)
+            } else {
+                drawPips() // if card has pips (numbers)
+            }
+        } else {
+            if let cardBackImage = UIImage(named: "cardback", in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
+                //bounds of an UIView is the rectangle, expressed as a location (x,y) and size (width,height) relative to its own coordinate sys (0,0).
+                cardBackImage.draw(in: bounds)
+            }
+        }
     }
     
     private func drawPips()
@@ -123,24 +143,6 @@ class PlayingCardView: UIView
         }
     }
 
-    override func draw(_ rect: CGRect) {
-        let roundedRect = UIBezierPath(roundedRect: bounds, cornerRadius: cornerRadius)
-        roundedRect.addClip()
-        UIColor.white.setFill()
-        roundedRect.fill()
-        
-        if isFaceUp {
-            if let faceCardImage = UIImage(named: rankString+suit, in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
-                faceCardImage.draw(in: bounds.zoom(by: faceCardScale))
-            } else {
-                drawPips()
-            }
-        } else {
-            if let cardBackImage = UIImage(named: "cardback", in: Bundle(for: self.classForCoder), compatibleWith: traitCollection) {
-                cardBackImage.draw(in: bounds)
-            }
-        }
-    }
 }
 
 extension PlayingCardView {
@@ -171,6 +173,7 @@ extension PlayingCardView {
     }
 }
 
+// contains the location and dimensions of a rectangle.
 extension CGRect {
     var leftHalf: CGRect {
         return CGRect(x: minX, y: minY, width: width/2, height: height)
@@ -190,7 +193,7 @@ extension CGRect {
         return insetBy(dx: (width - newWidth) / 2, dy: (height - newHeight) / 2)
     }
 }
-
+// contains a point in a two-dimensional coordinate system.
 extension CGPoint {
     func offsetBy(dx: CGFloat, dy: CGFloat) -> CGPoint {
         return CGPoint(x: x+dx, y: y+dy)

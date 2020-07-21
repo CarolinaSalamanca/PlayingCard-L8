@@ -19,7 +19,7 @@ struct PlayingCard: CustomStringConvertible
         case clubs = "♣️"
         case diamonds = "♦️"
         
-        static var all = [Suit.spades,.hearts,.diamonds,.clubs]
+        static var all = [Suit.spades, .hearts, .diamonds, .clubs]
         
         var description: String { return rawValue }
     }
