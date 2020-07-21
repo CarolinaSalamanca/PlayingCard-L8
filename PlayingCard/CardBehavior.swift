@@ -64,7 +64,7 @@ class CardBehavior: UIDynamicBehavior
         addChildBehavior(collisionBehavior)
         addChildBehavior(itemBehavior)
     }
-    
+    // convenience initß
     convenience init(in animator: UIDynamicAnimator) {
         self.init()
         animator.addBehavior(self)
