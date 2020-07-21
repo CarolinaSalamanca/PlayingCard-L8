@@ -34,6 +34,7 @@ class ViewController: UIViewController {
             cardBehavior.addItem(cardView) // this is to add movement to the cards
         }
     }
+    // MARK: Comment just to test git 
 
     private var faceUpCardViews: [PlayingCardView] {
         return cardViews.filter { $0.isFaceUp && !$0.isHidden && $0.transform != CGAffineTransform.identity.scaledBy(x: 3.0, y: 3.0) && $0.alpha == 1 }
